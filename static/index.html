@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="fr" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recherche de livres</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    />
+    <style>
+      :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      [data-bs-theme="dark"] {
+        --card-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        --card-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        transition: var(--transition);
+      }
+
+      [data-bs-theme="dark"] body {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      }
+
+      .header-container {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+      }
+
+      [data-bs-theme="dark"] .header-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+      }
+
+      .main-title {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+        font-size: clamp(1.5rem, 5vw, 2.5rem);
+        margin: 0;
+      }
+
+      .search-container {
+        background: white;
+        border-radius: 20px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+      }
+
+      [data-bs-theme="dark"] .search-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+      }
+
+      .input-group {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      }
+
+      #searchInput {
+        border: none;
+        padding: 1rem 1.5rem;
+        font-size: 1.1rem;
+        background: rgba(255, 255, 255, 0.9);
+        transition: var(--transition);
+      }
+
+      [data-bs-theme="dark"] #searchInput {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+
+      #searchInput:focus {
+        box-shadow: none;
+        background: white;
+      }
+
+      [data-bs-theme="dark"] #searchInput:focus {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      #searchBtn {
+        background: var(--primary-gradient);
+        border: none;
+        padding: 1rem 2rem;
+        font-weight: 600;
+        transition: var(--transition);
+      }
+
+      #searchBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-group .btn {
+        border-radius: 15px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        border: 2px solid;
+        transition: var(--transition);
+      }
+
+      .btn-group .btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .history-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+        transition: var(--transition);
+      }
+
+      [data-bs-theme="dark"] .history-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+      }
+
+      .history-item {
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: var(--transition);
+        background: var(--primary-gradient);
+      }
+
+      .history-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      .card {
+        border: none;
+        border-radius: 20px;
+        overflow: hidden;
+        transition: var(--transition);
+        box-shadow: var(--card-shadow);
+        background: white;
+        position: relative;
+      }
+
+      [data-bs-theme="dark"] .card {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(10px);
+      }
+
+      .card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--card-hover-shadow);
+      }
+
+      .favorite-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .favorite-badge:hover {
+        transform: scale(1.1);
+      }
+
+      .favorite-badge.active {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+
+      .card-img-top {
+        object-fit: cover;
+        width: 100%;
+        transition: var(--transition);
+      }
+
+      .flip-card {
+        perspective: 1000px;
+        cursor: pointer;
+      }
+
+      .flip-card-inner {
+        position: relative;
+        width: 100%;
+        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        transform-style: preserve-3d;
+      }
+
+      .flip-card:hover .flip-card-inner,
+      .flip-card.touch .flip-card-inner {
+        transform: rotateY(180deg);
+      }
+
+      .flip-card-front,
+      .flip-card-back {
+        position: absolute;
+        width: 100%;
+        backface-visibility: hidden;
+        border-radius: 20px 20px 0 0;
+        overflow: hidden;
+      }
+
+      .flip-card-back {
+        transform: rotateY(180deg);
+        background: linear-gradient(
+          135deg,
+          rgba(102, 126, 234, 0.95) 0%,
+          rgba(118, 75, 162, 0.95) 100%
+        );
+        color: white;
+        padding: 1.5rem;
+        font-size: 0.85rem;
+        line-height: 1.6;
+        overflow-y: auto;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      @media (min-width: 1200px) {
+        .flip-card-inner {
+          height: 300px;
+        }
+      }
+      @media (max-width: 1199px) {
+        .flip-card-inner {
+          height: 120px;
+        }
+      }
+      @media (max-width: 768px) {
+        .flip-card-inner {
+          height: 180px;
+        }
+      }
+      @media (max-width: 576px) {
+        .flip-card-inner {
+          height: 140px;
+        }
+      }
+      .flip-card-front,
+      .flip-card-back {
+        height: 100%;
+      }
+
+      .card-body {
+        padding: 0.5rem;
+      }
+
+      .card-title {
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 0.75rem;
+        font-size: 1rem;
+        line-height: 1.4;
+      }
+
+      [data-bs-theme="dark"] .card-title {
+        color: white;
+      }
+
+      .btn-secondary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 10px;
+        padding: 0.6rem;
+        font-weight: 600;
+        transition: var(--transition);
+      }
+
+      .btn-secondary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .link-success {
+        background: rgba(102, 126, 234, 0.1);
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: var(--transition);
+        display: inline-block;
+        margin: 0.25rem;
+      }
+
+      .link-success:hover {
+        background: rgba(102, 126, 234, 0.2);
+        transform: translateY(-1px);
+      }
+
+      #spinner {
+        display: none;
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: var(--card-shadow);
+        animation: fadeIn 0.3s;
+      }
+
+      [data-bs-theme="dark"] #spinner {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .spinner-border {
+        width: 3rem;
+        height: 3rem;
+        border-width: 0.3rem;
+        border-color: #667eea;
+        border-right-color: transparent;
+      }
+
+      .toggle-author {
+        color: #667eea;
+        font-weight: 600;
+        text-decoration: none;
+        transition: var(--transition);
+      }
+
+      .toggle-author:hover {
+        color: #764ba2;
+        text-decoration: underline;
+      }
+
+      .results-grid {
+        animation: fadeIn 0.5s;
+      }
+      .favorite-badge .spinner-border {
+        display: none;
+        width: 1rem;
+        height: 1rem;
+        border-width: 0.15rem;
+        border-color: #667eea;
+        border-right-color: transparent;
+      }
+
+      .favorite-badge.downloading .spinner-border {
+        display: inline-block;
+      }
+
+      .favorite-badge.downloading span {
+        display: none; /* cache le coeur pendant le téléchargement */
+      }
+    </style>
+  </head>
+  <body class="p-3 p-md-4">
+    <div class="container-fluid" style="max-width: 1600px">
+      <div class="header-container">
+        <div
+          class="d-flex justify-content-between align-items-center flex-wrap gap-3"
+        >
+          <h1 class="main-title">📚 Recherche de livres</h1>
+          <div class="btn-group gap-2">
+            <button id="favoritesBtn" class="btn btn-outline-danger">
+              ❤️ Mes favoris (<span id="favCount">0</span>)
+            </button>
+            <button id="themeToggle" class="btn btn-outline-secondary">
+              🌙 Mode sombre
+            </button>
+          </div>
+        </div>
+        <div class="mt-3" id="userInfo" style="display: none">
+          <small class="text-muted"
+            >👤 Connecté en tant que: <strong id="currentUser"></strong
+          ></small>
+        </div>
+      </div>
+
+      <div class="search-container">
+        <div class="input-group shadow-sm">
+          <input
+            id="searchInput"
+            type="text"
+            class="form-control"
+            placeholder='Recherchez un livre, ex: "CRPE 2025"'
+          />
+          <button id="searchBtn" class="btn btn-primary">🔍 Rechercher</button>
+        </div>
+      </div>
+
+      <div class="history-container" id="historyContainer">
+        <small class="text-muted d-block mb-2"
+          >📜 Historique de recherche</small
+        >
+        <div id="history" class="d-flex flex-wrap gap-2"></div>
+      </div>
+
+      <div id="spinner" class="text-center my-4">
+        <div class="spinner-border" role="status"></div>
+        <p class="mt-3 text-muted">Recherche en cours...</p>
+      </div>
+
+      <div id="results" class="row g-4 results-grid"></div>
+    </div>
+
+    <!-- Modal pour le nom d'utilisateur -->
+    <div
+      class="modal fade"
+      id="usernameModal"
+      tabindex="-1"
+      data-bs-backdrop="static"
+    >
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">👤 Identification</h5>
+          </div>
+          <div class="modal-body">
+            <label class="form-label">Entrez votre nom d'utilisateur:</label>
+            <input
+              type="text"
+              class="form-control"
+              id="usernameInput"
+              placeholder="ex: Jean"
+            />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="saveUsername">
+              Valider
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      let currentUsername = localStorage.getItem("username");
+      let userFavorites = [];
+      let currentView = "search"; // "search" ou "favorites"
+
+      function checkUsername() {
+        if (!currentUsername) {
+          const modal = new bootstrap.Modal(
+            document.getElementById("usernameModal")
+          );
+          modal.show();
+          return false;
+        }
+        document.getElementById("userInfo").style.display = "block";
+        document.getElementById("currentUser").textContent = currentUsername;
+        loadFavorites();
+        return true;
+      }
+
+      document.getElementById("saveUsername").addEventListener("click", () => {
+        const username = document.getElementById("usernameInput").value.trim();
+        if (!username) {
+          alert("⚠️ Veuillez entrer un nom d'utilisateur");
+          return;
+        }
+        currentUsername = username;
+        localStorage.setItem("username", username);
+        bootstrap.Modal.getInstance(
+          document.getElementById("usernameModal")
+        ).hide();
+        document.getElementById("userInfo").style.display = "block";
+        document.getElementById("currentUser").textContent = currentUsername;
+        loadFavorites();
+      });
+
+      async function loadFavorites() {
+        if (!currentUsername) return;
+
+        try {
+          const res = await fetch(
+            `/favorites?username=${encodeURIComponent(currentUsername)}`
+          );
+          const data = await res.json();
+          userFavorites = data.data || [];
+          document.getElementById("favCount").textContent =
+            userFavorites.length;
+        } catch (error) {
+          console.error("Erreur chargement favoris:", error);
+        }
+      }
+
+      async function toggleFavorite(book, button) {
+        if (!checkUsername()) return;
+
+        const isFavorite = userFavorites.some((fav) => fav.url === book.url);
+
+        try {
+          if (isFavorite) {
+            const res = await fetch("/favorites", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                username: currentUsername,
+                url: book.url,
+              }),
+            });
+            const data = await res.json();
+
+            if (data.success) {
+              userFavorites = userFavorites.filter(
+                (fav) => fav.url !== book.url
+              );
+              button.textContent = "🤍";
+              button.classList.remove("active");
+              document.getElementById("favCount").textContent =
+                userFavorites.length;
+            }
+          } else {
+            const res = await fetch("/favorites", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: currentUsername, book: book }),
+            });
+            const data = await res.json();
+
+            if (data.success) {
+              userFavorites.push(book);
+              button.textContent = "❤️";
+              button.classList.add("active");
+              document.getElementById("favCount").textContent =
+                userFavorites.length;
+            }
+          }
+        } catch (error) {
+          alert("❌ Erreur lors de la modification du favori");
+        }
+      }
+
+      function addToHistory(query) {
+        let history = JSON.parse(localStorage.getItem("history") || "[]");
+        if (!history.includes(query)) {
+          history.unshift(query);
+          history = history.slice(0, 10);
+          localStorage.setItem("history", JSON.stringify(history));
+        }
+        renderHistory();
+      }
+
+      function renderHistory() {
+        const history = JSON.parse(localStorage.getItem("history") || "[]");
+        const container = document.getElementById("history");
+        const historyContainer = document.getElementById("historyContainer");
+
+        if (history.length === 0) {
+          historyContainer.style.display = "none";
+          return;
+        }
+
+        historyContainer.style.display = "block";
+        container.innerHTML = history
+          .map((q) => `<span class="badge history-item">${q}</span>`)
+          .join("");
+
+        document.querySelectorAll(".history-item").forEach((el) => {
+          el.addEventListener("click", () => {
+            document.getElementById("searchInput").value = el.textContent;
+            performSearch();
+          });
+        });
+      }
+
+      function toggleSpinner(show) {
+        document.getElementById("spinner").style.display = show
+          ? "block"
+          : "none";
+      }
+
+      function handleImageError(img) {
+        if (!img.dataset.fallback) {
+          img.dataset.fallback = "1";
+          img.src =
+            "https://placehold.co/300x400/667eea/ffffff?text=Aucune+image";
+        }
+      }
+
+      function renderBook(book) {
+        const isFavorite = userFavorites.some((fav) => fav.url === book.url);
+        const maxAuthorLength = 40;
+        const isLongAuthor = book.author.length > maxAuthorLength;
+        const shortAuthor = book.author.slice(0, maxAuthorLength) + "...";
+
+        return `
+    <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+      <div class="card h-100">
+      <div class="favorite-badge ${
+        isFavorite ? "active" : ""
+      }" onclick='toggleFavorite(${JSON.stringify(book).replace(
+          /'/g,
+          "&#39;"
+        )}, this)'>
+        <span>${isFavorite ? "❤️" : "🤍"}</span>
+        <div class="spinner-border spinner-border-sm" role="status"></div>
+      </div>
+
+        <div class="flip-card" onclick="this.classList.toggle('touch')">
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <img src="${book.image}" class="card-img-top" alt="${
+          book.title
+        }" onerror="handleImageError(this)">
+            </div>
+            <div class="flip-card-back">
+              <p>${
+                book.description ||
+                "Aucune description disponible pour ce livre."
+              }</p>
+            </div>
+          </div>
+        </div>
+        <div class="card-body d-flex flex-column">
+          <h6 class="card-title">${book.title}</h6>
+          <p class="card-text text-muted small mb-3">
+            <span class="author-short">${
+              isLongAuthor ? shortAuthor : book.author
+            }</span>
+            ${
+              isLongAuthor
+                ? `<a href="#" class="toggle-author small">[+]</a>`
+                : ""
+            }
+            <span class="author-full d-none">${book.author}</span>
+          </p>
+          <div class="mt-auto">
+            <a href="${
+              book.url
+            }" class="btn btn-secondary btn-sm w-100 mb-2" target="_blank">📖 Voir le livre</a>
+            ${
+              book.download_links && book.download_links.length > 0
+                ? `<div class="small text-muted mb-1">💾 Lien de téléchargements: (${book.download_links.length})</div>`
+                : ""
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+      }
+
+      async function performSearch() {
+        const query = document.getElementById("searchInput").value.trim();
+        if (!query) {
+          alert("⚠️ Veuillez entrer un terme de recherche");
+          return;
+        }
+
+        currentView = "search";
+        addToHistory(query);
+        toggleSpinner(true);
+        document.getElementById("results").innerHTML = "";
+
+        try {
+          const res = await fetch(`/search?q=${encodeURIComponent(query)}`);
+          const data = await res.json();
+          toggleSpinner(false);
+
+          const container = document.getElementById("results");
+
+          if (!data.data || data.data.length === 0) {
+            container.innerHTML = `
+        <div class="col-12">
+          <div class="alert alert-info" role="alert">
+            Aucun résultat trouvé pour "${query}"
+          </div>
+        </div>
+      `;
+            return;
+          }
+
+          container.innerHTML = data.data
+            .map((book) => renderBook(book))
+            .join("");
+          attachToggleListeners();
+        } catch (error) {
+          toggleSpinner(false);
+          document.getElementById("results").innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-danger" role="alert">
+          ❌ Une erreur est survenue lors de la recherche. Veuillez réessayer.
+        </div>
+      </div>
+    `;
+        }
+      }
+
+      function showFavorites() {
+        if (!checkUsername()) return;
+
+        currentView = "favorites";
+        const container = document.getElementById("results");
+
+        if (userFavorites.length === 0) {
+          container.innerHTML = `
+      <div class="col-12">
+        <div class="alert alert-info" role="alert">
+          💔 Vous n'avez pas encore de favoris
+        </div>
+      </div>
+    `;
+          return;
+        }
+
+        container.innerHTML = userFavorites
+          .map((book) => renderBook(book))
+          .join("");
+        attachToggleListeners();
+      }
+
+      function attachToggleListeners() {
+        document.querySelectorAll(".toggle-author").forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            const p = btn.closest("p");
+            const shortSpan = p.querySelector(".author-short");
+            const fullSpan = p.querySelector(".author-full");
+            const isHidden = fullSpan.classList.contains("d-none");
+            fullSpan.classList.toggle("d-none", !isHidden);
+            shortSpan.classList.toggle("d-none", isHidden);
+            btn.textContent = isHidden ? "[-]" : "[+]";
+          });
+        });
+      }
+
+      document
+        .getElementById("searchBtn")
+        .addEventListener("click", performSearch);
+      document
+        .getElementById("searchInput")
+        .addEventListener("keydown", (e) => {
+          if (e.key === "Enter") performSearch();
+        });
+
+      document
+        .getElementById("favoritesBtn")
+        .addEventListener("click", showFavorites);
+
+      document.getElementById("themeToggle").addEventListener("click", () => {
+        const html = document.documentElement;
+        const currentTheme = html.getAttribute("data-bs-theme");
+        const newTheme = currentTheme === "light" ? "dark" : "light";
+        html.setAttribute("data-bs-theme", newTheme);
+        document.getElementById("themeToggle").textContent =
+          newTheme === "light" ? "🌙 Mode sombre" : "☀️ Mode clair";
+      });
+
+      checkUsername();
+      renderHistory();
+    </script>
+  </body>
+</html>
